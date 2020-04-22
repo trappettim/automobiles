@@ -26,6 +26,7 @@ main_df = pd.read_csv(url, header=None, names=headers_names, na_values='?')
 
 """print(main_df.columns)"""  # to print the headers
 """print(main_df.to_string())"""  # to print the entire dataframe
+"""print(main_df)""" # to print the first and the last 30 rows
 
 """FINDING MISSING VALUES"""
 
@@ -68,8 +69,20 @@ main_df['num-of-doors'].replace(np.nan, mode[0],inplace=True) # replaces NaN wit
 mode = main_df['num-of-doors'].value_counts().idxmax() # value_counts for counting unique values. idxmax for mode
 main_df['num-of-doors'].replace(np.nan, mode,inplace=True)  # replaces NaN with the only element of the series mode
 
-print(main_df)
-print(main_df.dtypes)
+
+"""CORRECT DATA FORMAT"""
+
+"""print(main_df.dtypes) # to find out the data type of each column of the df
+dft = main_df.dtypes.tolist()  # to store the types before the changes. Later we will print a table with the canges
+main_df[["bore", "stroke"]] = main_df[["bore", "stroke"]].astype("float")  # to change the type to float
+main_df[["normalized-losses"]] = main_df[["normalized-losses"]].astype("int")  
+main_df[["price"]] = main_df[["price"]].astype("float")
+main_df[["peak-rpm"]] = main_df[["peak-rpm"]].astype("float")
+
+test = pd.DataFrame([dft,main_df.dtypes.tolist()],columns=headers_names)  # to create a table with changes
+print(test)"""
+
+
 
 """# how to one-hot encode the fuel type column (turning categorical values into numerical ones)
 dummy = pd.get_dummies(main_df['fuel-type'])  # creates a dummy object
