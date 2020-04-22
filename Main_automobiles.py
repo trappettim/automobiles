@@ -36,7 +36,12 @@ main_df.dropna(subset=['price'], inplace=True)
 mean = main_df['normalized-losses'].mean()
 main_df['normalized-losses'] = main_df['normalized-losses'].replace(np.nan, mean)
 
-# how to one-hot encode the fuel type column
+# how to one-hot encode the fuel type column (turning categorical values into numerical ones)
 dummy = pd.get_dummies(main_df['fuel-type'])  # creates a dummy object
 main_df = pd.concat([main_df, dummy], axis=1)  # concatenates the dummy object with the df
-print(main_df.head())
+
+# Binning
+bins = np.linspace(main_df['price'].min(),main_df['price'].max(),4) # creates np arrays with 4 equally spaced numbers
+group_names = ['Low','Medium','High'] # list with the label names
+main_df['price_binned'] = pd.cut(main_df['price'],bins,labels=group_names,include_lowest=True) # creates the new column
+print(main_df)
