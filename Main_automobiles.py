@@ -91,12 +91,17 @@ print(test)"""
 main_df["city-mpg"] = 235 / main_df["city-mpg"]
 
 # rename column
-df.rename(columns={'"city-mpg"':'city-L/100km'}, inplace=True)
+main_df.rename(columns={'city-mpg':'city-L/100km'}, inplace=True)
 
 # same for another column. A function could have been created
 main_df["highway-mpg"] = 235 / main_df["highway-mpg"]
-df.rename(columns={'"highway-mpg"':'highway-L/100km'}, inplace=True)
+main_df.rename(columns={'highway-mpg':'highway-L/100km'}, inplace=True)
 
+"""DATA NORMALIZATION"""
+
+main_df['length'] = main_df['length']/main_df['length'].max()  # simple feature scaling [0,1]
+main_df['height'] = main_df['height']/main_df['height'].max()  # simple feature scaling [0,1]
+main_df['width'] = main_df['width']/main_df['width'].max()  # simple feature scaling [0,1]
 
 
 """# how to one-hot encode the fuel type column (turning categorical values into numerical ones)
