@@ -106,7 +106,7 @@ main_df['width'] = main_df['width'] / main_df['width'].max()  # simple feature s
 """DATA BINNING"""
 
 """Firstly lets plot the histogram of the column to see how is the distribution"""
-plt.hist(main_df["horsepower"])  # plot histogram
+plt.hist(main_df["horsepower"])  # plot histogram. If we add bins = 3 it shows the histogram on 3 bins
 plt.xlabel("horsepower")  # set x label
 plt.ylabel("count")  # set y label
 plt.title("horsepower bins")  # plot title
@@ -122,8 +122,19 @@ group_names = ['Low', 'Medium', 'High']
 
 # creates the new column
 main_df['horsepower_binned'] = pd.cut(main_df['horsepower'], bins, labels=group_names, include_lowest=True)
-print(main_df)
 
-"""# how to one-hot encode the fuel type column (turning categorical values into numerical ones)
-dummy = pd.get_dummies(main_df['fuel-type'])  # creates a dummy object
-main_df = pd.concat([main_df, dummy], axis=1)  # concatenates the dummy object with the df"""
+"""INDICATOR (OR DUMMY) VARIABLES / HOT-ONE ENCODING"""
+
+"""that's how to turn categorical values into numerical values"""
+
+dummy_var1 = pd.get_dummies(main_df['fuel-type'])  # creates a dummy object
+dummy_var1.rename(columns={'fuel-type-gas': 'gas', 'fuel-type-diesel': 'diesel'}, inplace=True)  # renames columns
+main_df = pd.concat([main_df, dummy_var1], axis=1)  # concatenates the dummy object with the df
+main_df.drop("fuel-type", axis=1, inplace=True) # drops the original column
+
+dummy_var2 = pd.get_dummies(main_df['aspiration'])
+dummy_var2.rename(columns={'std':'aspiration-std', 'turbo':'aspiration-turbo'}, inplace=True)
+main_df = pd.concat([main_df, dummy_var2], axis=1)
+main_df.drop("aspiration", axis=1, inplace=True) # drops the original column
+
+print(main_df.head())
