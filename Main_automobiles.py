@@ -73,14 +73,29 @@ main_df['num-of-doors'].replace(np.nan, mode,inplace=True)  # replaces NaN with 
 """CORRECT DATA FORMAT"""
 
 """print(main_df.dtypes) # to find out the data type of each column of the df
-dft = main_df.dtypes.tolist()  # to store the types before the changes. Later we will print a table with the canges
+dft = main_df.dtypes.tolist()  # to store the types before the changes. Later we will print a table with the canges"""
+
 main_df[["bore", "stroke"]] = main_df[["bore", "stroke"]].astype("float")  # to change the type to float
 main_df[["normalized-losses"]] = main_df[["normalized-losses"]].astype("int")  
 main_df[["price"]] = main_df[["price"]].astype("float")
 main_df[["peak-rpm"]] = main_df[["peak-rpm"]].astype("float")
 
-test = pd.DataFrame([dft,main_df.dtypes.tolist()],columns=headers_names)  # to create a table with changes
+"""test = pd.DataFrame([dft,main_df.dtypes.tolist()],columns=headers_names)  # to create a table with changes
 print(test)"""
+
+"""DATA STANDARDIZATION"""
+
+"""all the column must be in the correct unit"""
+
+# transform the data in the column via a mathematical operation
+main_df["city-mpg"] = 235 / main_df["city-mpg"]
+
+# rename column
+df.rename(columns={'"city-mpg"':'city-L/100km'}, inplace=True)
+
+# same for another column. A function could have been created
+main_df["highway-mpg"] = 235 / main_df["highway-mpg"]
+df.rename(columns={'"highway-mpg"':'highway-L/100km'}, inplace=True)
 
 
 
