@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 """PRINTING SETTINGS FOR DATAFRAMES AND ARRAYS"""
 
@@ -26,7 +27,7 @@ main_df = pd.read_csv(url, header=None, names=headers_names, na_values='?')
 
 """print(main_df.columns)"""  # to print the headers
 """print(main_df.to_string())"""  # to print the entire dataframe
-"""print(main_df)""" # to print the first and the last 30 rows
+"""print(main_df)"""  # to print the first and the last 30 rows
 
 """FINDING MISSING VALUES"""
 
@@ -51,12 +52,12 @@ main_df.dropna(subset=['price'], inplace=True)
 
 """REPLACE MISSING VALUE WITH MEAN VALUES"""
 
-Col_mean_val = ['normalized-losses','bore', 'stroke','horsepower','peak-rpm']
+Col_mean_val = ['normalized-losses', 'bore', 'stroke', 'horsepower', 'peak-rpm']
 
 # replaces the NaN values in all the columns in Col_mean_val with the mean of the column
 for column in Col_mean_val:
     mean = main_df[column].astype("float").mean(axis=0)
-    main_df[column].replace(np.nan, mean,inplace=True)
+    main_df[column].replace(np.nan, mean, inplace=True)
 
 """REPLACE MISSING VALUE WITH FREQUENCY"""
 
@@ -66,9 +67,8 @@ main_df['num-of-doors'].replace(np.nan, mode[0],inplace=True) # replaces NaN wit
 """
 
 """second method"""
-mode = main_df['num-of-doors'].value_counts().idxmax() # value_counts for counting unique values. idxmax for mode
-main_df['num-of-doors'].replace(np.nan, mode,inplace=True)  # replaces NaN with the only element of the series mode
-
+mode = main_df['num-of-doors'].value_counts().idxmax()  # value_counts for counting unique values. idxmax for mode
+main_df['num-of-doors'].replace(np.nan, mode, inplace=True)  # replaces NaN with the only element of the series mode
 
 """CORRECT DATA FORMAT"""
 
@@ -76,7 +76,7 @@ main_df['num-of-doors'].replace(np.nan, mode,inplace=True)  # replaces NaN with 
 dft = main_df.dtypes.tolist()  # to store the types before the changes. Later we will print a table with the canges"""
 
 main_df[["bore", "stroke"]] = main_df[["bore", "stroke"]].astype("float")  # to change the type to float
-main_df[["normalized-losses"]] = main_df[["normalized-losses"]].astype("int")  
+main_df[["normalized-losses"]] = main_df[["normalized-losses"]].astype("int")
 main_df[["price"]] = main_df[["price"]].astype("float")
 main_df[["peak-rpm"]] = main_df[["peak-rpm"]].astype("float")
 
@@ -91,25 +91,39 @@ print(test)"""
 main_df["city-mpg"] = 235 / main_df["city-mpg"]
 
 # rename column
-main_df.rename(columns={'city-mpg':'city-L/100km'}, inplace=True)
+main_df.rename(columns={'city-mpg': 'city-L/100km'}, inplace=True)
 
 # same for another column. A function could have been created
 main_df["highway-mpg"] = 235 / main_df["highway-mpg"]
-main_df.rename(columns={'highway-mpg':'highway-L/100km'}, inplace=True)
+main_df.rename(columns={'highway-mpg': 'highway-L/100km'}, inplace=True)
 
 """DATA NORMALIZATION"""
 
-main_df['length'] = main_df['length']/main_df['length'].max()  # simple feature scaling [0,1]
-main_df['height'] = main_df['height']/main_df['height'].max()  # simple feature scaling [0,1]
-main_df['width'] = main_df['width']/main_df['width'].max()  # simple feature scaling [0,1]
+main_df['length'] = main_df['length'] / main_df['length'].max()  # simple feature scaling [0,1]
+main_df['height'] = main_df['height'] / main_df['height'].max()  # simple feature scaling [0,1]
+main_df['width'] = main_df['width'] / main_df['width'].max()  # simple feature scaling [0,1]
 
+"""DATA BINNING"""
+
+"""Firstly lets plot the histogram of the column to see how is the distribution"""
+plt.hist(main_df["horsepower"])  # plot histogram
+plt.xlabel("horsepower")  # set x label
+plt.ylabel("count")  # set y label
+plt.title("horsepower bins")  # plot title
+"""plt.show() #  command to open a new window and show the plot"""
+
+"""cut the column in equally spaced bins"""
+
+# creates np arrays with 4 equally spaced numbers
+bins = np.linspace(main_df['horsepower'].min(), main_df['horsepower'].max(), 4)
+
+# list with the label names
+group_names = ['Low', 'Medium', 'High']
+
+# creates the new column
+main_df['horsepower_binned'] = pd.cut(main_df['horsepower'], bins, labels=group_names, include_lowest=True)
+print(main_df)
 
 """# how to one-hot encode the fuel type column (turning categorical values into numerical ones)
 dummy = pd.get_dummies(main_df['fuel-type'])  # creates a dummy object
-main_df = pd.concat([main_df, dummy], axis=1)  # concatenates the dummy object with the df
-
-# Binning
-bins = np.linspace(main_df['price'].min(),main_df['price'].max(),4) # creates np arrays with 4 equally spaced numbers
-group_names = ['Low','Medium','High'] # list with the label names
-main_df['price_binned'] = pd.cut(main_df['price'],bins,labels=group_names,include_lowest=True) # creates the new column
-print(main_df)"""
+main_df = pd.concat([main_df, dummy], axis=1)  # concatenates the dummy object with the df"""
