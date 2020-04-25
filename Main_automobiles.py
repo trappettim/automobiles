@@ -1,6 +1,8 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
 
 """PRINTING SETTINGS FOR DATAFRAMES AND ARRAYS"""
 
@@ -12,6 +14,7 @@ pd.set_option('display.width', desired_width)  # display width
 pd.set_option('display.max_columns', 30)  # number of columns
 """np.set_printoptions(linewidth=desired_width)"""  # numpy set display width
 
+"""MODULE 1"""
 """IMPORTING DATASET INTO PANDAS DATAFRAME"""
 
 url = 'imports-85.data'
@@ -29,6 +32,7 @@ main_df = pd.read_csv(url, header=None, names=headers_names, na_values='?')
 """print(main_df.to_string())"""  # to print the entire dataframe
 """print(main_df)"""  # to print the first and the last 30 rows
 
+"""MODULE 2"""
 """FINDING MISSING VALUES"""
 
 #  to replace '?' with NaN if we hadn't done before
@@ -105,14 +109,14 @@ main_df['width'] = main_df['width'] / main_df['width'].max()  # simple feature s
 
 """DATA BINNING"""
 
-"""Firstly lets plot the histogram of the column to see how is the distribution"""
-plt.hist(main_df["horsepower"])  # plot histogram. If we add bins = 3 it shows the histogram on 3 bins
+# Firstly lets plot the histogram of the column to see how is the distribution
+"""plt.hist(main_df["horsepower"])  # plot histogram. If we add bins = 3 it shows the histogram on 3 bins
 plt.xlabel("horsepower")  # set x label
 plt.ylabel("count")  # set y label
 plt.title("horsepower bins")  # plot title
-"""plt.show() #  command to open a new window and show the plot"""
+plt.show() #  command to open a new window and show the plot"""
 
-"""cut the column in equally spaced bins"""
+"""Cut the column in equally spaced bins"""
 
 # creates np arrays with 4 equally spaced numbers
 bins = np.linspace(main_df['horsepower'].min(), main_df['horsepower'].max(), 4)
@@ -137,4 +141,77 @@ dummy_var2.rename(columns={'std':'aspiration-std', 'turbo':'aspiration-turbo'}, 
 main_df = pd.concat([main_df, dummy_var2], axis=1)
 main_df.drop("aspiration", axis=1, inplace=True) # drops the original column
 
-print(main_df.head())
+"""MODULE 3"""
+"""DESCRIPTIVE STATISTICS"""
+
+# to compute and show different statistics of the numerical columns
+"""print(main_df.describe())"""
+
+# to include also the object type in the table
+"""print(main_df.describe(include=['object]'))"""
+
+# another good descriptor of categorical values is the value counts. Value counts only takes Pandas series
+# so we have single [] and not double [[]]
+"""print(main_df['engine-location'].value_counts())"""
+
+# we can print a refined version of the df value counts
+"""engine_loc_counts = df['engine-location'].value_counts().to_frame()
+engine_loc_counts.rename(columns={'engine-location': 'value_counts'}, inplace=True)
+engine_loc_counts.index.name = 'engine-location'
+print(engine_loc_counts)"""
+
+# to show the Pearson coefficient of correlation between all the numerical columns
+"""print(main_df.corr())  # useful to spot high correlations"""
+
+# to investigate further a correlation between two numerical variables we can plot the scatterplot
+# with the regression line
+"""sns.regplot('engine-size','price', data=main_df)
+plt.ylim(0,)
+plt.show()"""
+#and then we calculate the correlation between the two columns
+"""main_df[['engine-size','price']].corr()"""
+
+# for categorical value we use the boxplot to investigate correlations
+"""sns.boxplot(x="drive-wheels", y="price", data=main_df)
+plt.show()"""
+
+"""GROUPING"""
+
+# to look at how many categories there are in a variable
+"""print(main_df['drive-wheels'].unique())"""
+
+# to group by those unique values
+df_group_one = main_df[['drive-wheels','body-style','price']]
+"""df_group_one = df_group_one.groupby(['drive-wheels'],as_index=False).mean()
+print(df_group_one)"""
+
+# to group by two categorical values
+df_group_one = df_group_one.groupby(['drive-wheels', 'body-style'],as_index=False).mean()
+
+
+# to make a pivot out of the grouped variable
+grouped_pivot = df_group_one.pivot(index='drive-wheels',columns='body-style')
+# to fill the NaN values of the pivot (when a combination is not present in the dataset) with a 0
+grouped_pivot = grouped_pivot.fillna(0)
+
+# to create a heat-map of the pivot table
+plt.pcolor(grouped_pivot, cmap='RdBu')
+plt.colorbar()
+
+# to change labels visualization in the heat map
+fig, ax = plt.subplots()
+im = ax.pcolor(grouped_pivot, cmap='RdBu')
+#label names
+row_labels = grouped_pivot.columns.levels[1]
+col_labels = grouped_pivot.index
+#move ticks and labels to the center
+ax.set_xticks(np.arange(grouped_pivot.shape[1]) + 0.5, minor=False)
+ax.set_yticks(np.arange(grouped_pivot.shape[0]) + 0.5, minor=False)
+#insert labels
+ax.set_xticklabels(row_labels, minor=False)
+ax.set_yticklabels(col_labels, minor=False)
+#rotate label if too long
+plt.xticks(rotation=90)
+# show heat map
+fig.colorbar(im)
+plt.show()
