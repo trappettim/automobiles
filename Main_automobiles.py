@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from scipy import stats
+from sklearn.linear_model import LinearRegression
 
 
 """PRINTING SETTINGS FOR DATAFRAMES AND ARRAYS"""
@@ -98,8 +100,8 @@ main_df["city-mpg"] = 235 / main_df["city-mpg"]
 main_df.rename(columns={'city-mpg': 'city-L/100km'}, inplace=True)
 
 # same for another column. A function could have been created
-main_df["highway-mpg"] = 235 / main_df["highway-mpg"]
-main_df.rename(columns={'highway-mpg': 'highway-L/100km'}, inplace=True)
+"""main_df["highway-mpg"] = 235 / main_df["highway-mpg"]
+main_df.rename(columns={'highway-mpg': 'highway-L/100km'}, inplace=True)"""
 
 """DATA NORMALIZATION"""
 
@@ -165,9 +167,13 @@ print(engine_loc_counts)"""
 
 # to investigate further a correlation between two numerical variables we can plot the scatterplot
 # with the regression line
-"""sns.regplot('engine-size','price', data=main_df)
+"""width = 12
+height = 10
+plt.figure(figsize=(width, height))
+sns.regplot('engine-size','price', data=main_df)
 plt.ylim(0,)
 plt.show()"""
+
 #and then we calculate the correlation between the two columns
 """main_df[['engine-size','price']].corr()"""
 
@@ -181,21 +187,21 @@ plt.show()"""
 """print(main_df['drive-wheels'].unique())"""
 
 # to group by those unique values
-df_group_one = main_df[['drive-wheels','body-style','price']]
-"""df_group_one = df_group_one.groupby(['drive-wheels'],as_index=False).mean()
+"""df_group_one = main_df[['drive-wheels','body-style','price']]
+df_group_one = df_group_one.groupby(['drive-wheels'],as_index=False).mean()
 print(df_group_one)"""
 
 # to group by two categorical values
-df_group_one = df_group_one.groupby(['drive-wheels', 'body-style'],as_index=False).mean()
+"""df_group_one = df_group_one.groupby(['drive-wheels', 'body-style'],as_index=False).mean()"""
 
 
 # to make a pivot out of the grouped variable
-grouped_pivot = df_group_one.pivot(index='drive-wheels',columns='body-style')
+"""grouped_pivot = df_group_one.pivot(index='drive-wheels',columns='body-style')
 # to fill the NaN values of the pivot (when a combination is not present in the dataset) with a 0
-grouped_pivot = grouped_pivot.fillna(0)
+grouped_pivot = grouped_pivot.fillna(0)"""
 
 # to create a heat-map of the pivot table
-plt.pcolor(grouped_pivot, cmap='RdBu')
+"""plt.pcolor(grouped_pivot, cmap='RdBu')
 plt.colorbar()
 
 # to change labels visualization in the heat map
@@ -214,4 +220,86 @@ ax.set_yticklabels(col_labels, minor=False)
 plt.xticks(rotation=90)
 # show heat map
 fig.colorbar(im)
-plt.show()
+plt.show()"""
+
+"""CORRELATION"""
+
+# Pearson correlation coefficient and P-value
+"""pearson_coef, p_value = stats.pearsonr(main_df['wheel-base'], main_df['price'])
+print("The Pearson Correlation Coefficient is", pearson_coef, " with a P-value of P =", p_value)"""
+
+"""ANOVA"""
+
+# Firstly we need to group by a variable
+"""grouped_test2= main_df[['drive-wheels', 'price']].groupby(['drive-wheels'])"""
+
+# we can get one group with the command get_group
+"""print(grouped_test2.get_group('4wd')['price'])"""
+
+# to calculate the F-test score and the p-value
+"""f_val, p_val = stats.f_oneway(grouped_test2.get_group('fwd')['price'], grouped_test2.get_group('rwd')['price'],
+                              grouped_test2.get_group('4wd')['price'])
+
+print("ANOVA results: F=", f_val, ", P =", p_val)  """
+
+"""MODULE 4"""
+"""MODEL DEVELOPMENT"""
+
+"""Single linear regression"""
+
+lm = LinearRegression()  # Creates a LinearRegression Module
+X = main_df[['highway-mpg']]  # define the predictor
+lm.fit(X,main_df['price'])  # Train the module
+Yhat = lm.predict(X)  # Predict target variable
+#print(Yhat[0:5])  # show target value
+#print(lm.intercept_)  # show the intercept of the regression line
+#print(lm.coef_)  # show the slope of the regression line
+
+"""Multiple linear regression"""
+
+Z = main_df[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']] # define the predictors
+lm.fit(Z,main_df['price'])  # Train the module
+
+"""Model visualization"""
+
+# regression line
+#sns.regplot(main_df[['highway-mpg']],main_df['price'])
+
+# residual plot (mainly for single linear regression)
+#sns.residplot(main_df[['highway-mpg']],main_df['price'])
+
+# Distribution plot (mainly for multiple linear regression)
+Yhat = lm.predict(Z)
+ax1 = sns.distplot(main_df['price'],hist=False,color='r',label='actual value')
+sns.distplot(Yhat,hist=False,color='b',label='predicted value',ax=ax1)
+plt.title('Actual vs Fitted Values for Price')
+plt.xlabel('Price (in dollars)')
+plt.ylabel('Proportion of Cars')
+plt.close()
+
+
+"""Polynomial regression"""
+
+# numpy module for single polynomial regression (it works with SLR setting degree=1 in the polyfit method)
+x = main_df['highway-mpg']
+y = main_df['price']
+f = np.polyfit(x,y,3)  # train the module with a polynomial degree=3
+p = np.poly1d(f) # to display the polynomial funcion
+
+# function to plot polynomial regression
+def PlotPolly(model, independent_variable, dependent_variabble, Name):
+    x_new = np.linspace(15, 55, 100)
+    y_new = model(x_new)
+
+    plt.plot(independent_variable, dependent_variabble, '.', x_new, y_new, '-')
+    plt.title('Polynomial Fit with Matplotlib for Price ~ Length')
+    ax = plt.gca()
+    ax.set_facecolor((0.898, 0.898, 0.898))
+    fig = plt.gcf()
+    plt.xlabel(Name)
+    plt.ylabel('Price of Cars')
+
+    plt.show()
+    plt.close()
+
+PlotPolly(p, x, y, 'highway-mpg')
