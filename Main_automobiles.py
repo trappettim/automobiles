@@ -4,7 +4,11 @@ import pandas as pd
 import seaborn as sns
 from scipy import stats
 from sklearn.linear_model import LinearRegression
-
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 
 """PRINTING SETTINGS FOR DATAFRAMES AND ARRAYS"""
 
@@ -136,12 +140,12 @@ main_df['horsepower_binned'] = pd.cut(main_df['horsepower'], bins, labels=group_
 dummy_var1 = pd.get_dummies(main_df['fuel-type'])  # creates a dummy object
 dummy_var1.rename(columns={'fuel-type-gas': 'gas', 'fuel-type-diesel': 'diesel'}, inplace=True)  # renames columns
 main_df = pd.concat([main_df, dummy_var1], axis=1)  # concatenates the dummy object with the df
-main_df.drop("fuel-type", axis=1, inplace=True) # drops the original column
+main_df.drop("fuel-type", axis=1, inplace=True)  # drops the original column
 
 dummy_var2 = pd.get_dummies(main_df['aspiration'])
-dummy_var2.rename(columns={'std':'aspiration-std', 'turbo':'aspiration-turbo'}, inplace=True)
+dummy_var2.rename(columns={'std': 'aspiration-std', 'turbo': 'aspiration-turbo'}, inplace=True)
 main_df = pd.concat([main_df, dummy_var2], axis=1)
-main_df.drop("aspiration", axis=1, inplace=True) # drops the original column
+main_df.drop("aspiration", axis=1, inplace=True)  # drops the original column
 
 """MODULE 3"""
 """DESCRIPTIVE STATISTICS"""
@@ -174,7 +178,7 @@ sns.regplot('engine-size','price', data=main_df)
 plt.ylim(0,)
 plt.show()"""
 
-#and then we calculate the correlation between the two columns
+# and then we calculate the correlation between the two columns
 """main_df[['engine-size','price']].corr()"""
 
 # for categorical value we use the boxplot to investigate correlations
@@ -193,7 +197,6 @@ print(df_group_one)"""
 
 # to group by two categorical values
 """df_group_one = df_group_one.groupby(['drive-wheels', 'body-style'],as_index=False).mean()"""
-
 
 # to make a pivot out of the grouped variable
 """grouped_pivot = df_group_one.pivot(index='drive-wheels',columns='body-style')
@@ -245,49 +248,51 @@ print("ANOVA results: F=", f_val, ", P =", p_val)  """
 """MODULE 4"""
 """MODEL DEVELOPMENT"""
 
-"""Single linear regression"""
+"""Single linear regression (Scikit-Learn)"""
 
-lm = LinearRegression()  # Creates a LinearRegression Module
+lm_slr = LinearRegression()  # Creates a LinearRegression object
 X = main_df[['highway-mpg']]  # define the predictor
-lm.fit(X,main_df['price'])  # Train the module
-Yhat = lm.predict(X)  # Predict target variable
-#print(Yhat[0:5])  # show target value
-#print(lm.intercept_)  # show the intercept of the regression line
-#print(lm.coef_)  # show the slope of the regression line
+lm_slr.fit(X, main_df['price'])  # Train the module
+Yhat_slr = lm_slr.predict(X)  # Predict target variable
+# print(Yhat[0:5])  # show target value
+# print(lm.intercept_)  # show the intercept of the regression line
+# print(lm.coef_)  # show the slope of the regression line
 
-"""Multiple linear regression"""
+"""Multiple linear regression(Scikit-Learn)"""
 
-Z = main_df[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']] # define the predictors
-lm.fit(Z,main_df['price'])  # Train the module
+lm_mlr = LinearRegression()  # Creates a LinearRegression object
+Z = main_df[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']]  # define the predictors
+lm_mlr.fit(Z, main_df['price'])  # Train the module
+Yhat_mlr = lm_mlr.predict(Z)  # predicts target variable
 
 """Model visualization"""
 
 # regression line
-#sns.regplot(main_df[['highway-mpg']],main_df['price'])
+# sns.regplot(main_df[['highway-mpg']],main_df['price'])
 
 # residual plot (mainly for single linear regression)
-#sns.residplot(main_df[['highway-mpg']],main_df['price'])
+# sns.residplot(main_df[['highway-mpg']],main_df['price'])
 
 # Distribution plot (mainly for multiple linear regression)
-Yhat = lm.predict(Z)
-ax1 = sns.distplot(main_df['price'],hist=False,color='r',label='actual value')
-sns.distplot(Yhat,hist=False,color='b',label='predicted value',ax=ax1)
+"""ax1 = sns.distplot(main_df['price'], hist=False, color='r', label='actual value')
+sns.distplot(Yhat_mlr, hist=False, color='b', label='predicted value', ax=ax1)
 plt.title('Actual vs Fitted Values for Price')
 plt.xlabel('Price (in dollars)')
 plt.ylabel('Proportion of Cars')
-plt.close()
+plt.close()"""
 
-
-"""Polynomial regression"""
+"""Polynomial regression (Numpy or Scikitlearn)"""
 
 # numpy module for single polynomial regression (it works with SLR setting degree=1 in the polyfit method)
 x = main_df['highway-mpg']
 y = main_df['price']
-f = np.polyfit(x,y,3)  # train the module with a polynomial degree=3
-p = np.poly1d(f) # to display the polynomial funcion
+f = np.polyfit(x, y, 3)  # train the module with a polynomial degree=3
+p = np.poly1d(f)  # p is the polynomial function
+#print(p)  # displays the function
+#print(p(30))  # to make and display predictions
 
 # function to plot polynomial regression
-def PlotPolly(model, independent_variable, dependent_variabble, Name):
+""""def PlotPolly(model, independent_variable, dependent_variabble, Name):
     x_new = np.linspace(15, 55, 100)
     y_new = model(x_new)
 
@@ -302,6 +307,64 @@ def PlotPolly(model, independent_variable, dependent_variabble, Name):
     plt.show()
     plt.close()
 
-PlotPolly(p, x, y, 'highway-mpg')
+PlotPolly(p, x, y, 'highway-mpg')"""
 
-"""test github"""
+"""Multivariate Polynomial regression (Scikitlearn)"""
+
+pr = PolynomialFeatures(degree=2, include_bias=False)  # creates a PolynomialFeatures object
+Z_pr = pr.fit_transform(Z)  # creates a new set of predictor with the combinations of the original predictors
+lm_pr = LinearRegression()
+lm_pr.fit(Z_pr, main_df['price'])  # Train the module
+Yhat_pr = lm_pr.predict(Z_pr)  # predict target variable
+
+# draw a distribution plot
+"""ax1 = sns.distplot(main_df['price'], hist=False, color='r', label='actual value')
+sns.distplot(Yhat_pr, hist=False, color='b', label='predicted value', ax=ax1)
+plt.show()
+plt.close()"""
+
+"""Pipelines (Scikitlearn) Example for a Multivariate polynomial regression"""
+
+# firstly we create the pipeline
+Input=[('scale',StandardScaler()), ('polynomial', PolynomialFeatures(include_bias=False)), ('model',LinearRegression())]
+
+# we input the list to a pipeline constructor
+pipe=Pipeline(Input)
+
+# perform all the actions in the pipeline
+pipe.fit(Z,main_df['price'])
+
+"""MODEL NUMERICAL EVALUATION"""
+
+"""Single linear regression"""
+
+# Mean Squared Error (MSE)
+mse = mean_squared_error(main_df['price'], Yhat_slr)
+print('<SLR> The mean square error of price and predicted value is: ', mse)
+# R^2
+print(lm_slr.score(X,main_df['price']))
+
+"""Multiple linear regression"""
+
+# Mean Squared Error (MSE)
+mse = mean_squared_error(main_df['price'], Yhat_mlr)
+print('<MLR> The mean square error of price and predicted value is: ', mse)
+# R^2
+print(lm_mlr.score(Z,main_df['price']))
+
+"""Polynomial regression"""
+
+# Mean Squared Error (MSE)
+mse = mean_squared_error(main_df['price'], p(x))
+print('<PR> The mean square error of price and predicted value is: ', mse)
+
+# R^2 (we are using Numpy so it's a different code)
+r_squared = r2_score(main_df['price'], p(x))
+print('The R-square value is: ', r_squared)
+
+"""Multivariate Polynomial regression"""
+# Mean Squared Error (MSE)
+mse = mean_squared_error(main_df['price'], Yhat_pr)
+print('<MPR> The mean square error of price and predicted value is: ', mse)
+# R^2
+print(lm_pr.score(Z_pr,main_df['price']))
