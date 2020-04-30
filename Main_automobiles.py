@@ -9,6 +9,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_predict
+
 
 """PRINTING SETTINGS FOR DATAFRAMES AND ARRAYS"""
 
@@ -249,32 +253,32 @@ print("ANOVA results: F=", f_val, ", P =", p_val)  """
 """MODEL DEVELOPMENT"""
 
 """Single linear regression (Scikit-Learn)"""
-
+"""
 lm_slr = LinearRegression()  # Creates a LinearRegression object
 X = main_df[['highway-mpg']]  # define the predictor
 lm_slr.fit(X, main_df['price'])  # Train the module
 Yhat_slr = lm_slr.predict(X)  # Predict target variable
-# print(Yhat[0:5])  # show target value
-# print(lm.intercept_)  # show the intercept of the regression line
-# print(lm.coef_)  # show the slope of the regression line
+print(Yhat[0:5])  # show target value
+print(lm.intercept_)  # show the intercept of the regression line
+print(lm.coef_)  # show the slope of the regression line"""
 
 """Multiple linear regression(Scikit-Learn)"""
-
+"""
 lm_mlr = LinearRegression()  # Creates a LinearRegression object
 Z = main_df[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']]  # define the predictors
 lm_mlr.fit(Z, main_df['price'])  # Train the module
-Yhat_mlr = lm_mlr.predict(Z)  # predicts target variable
+Yhat_mlr = lm_mlr.predict(Z)  # predicts target variable"""
 
 """Model visualization"""
-
+"""
 # regression line
-# sns.regplot(main_df[['highway-mpg']],main_df['price'])
+sns.regplot(main_df[['highway-mpg']],main_df['price'])
 
 # residual plot (mainly for single linear regression)
-# sns.residplot(main_df[['highway-mpg']],main_df['price'])
+sns.residplot(main_df[['highway-mpg']],main_df['price'])
 
 # Distribution plot (mainly for multiple linear regression)
-"""ax1 = sns.distplot(main_df['price'], hist=False, color='r', label='actual value')
+ax1 = sns.distplot(main_df['price'], hist=False, color='r', label='actual value')
 sns.distplot(Yhat_mlr, hist=False, color='b', label='predicted value', ax=ax1)
 plt.title('Actual vs Fitted Values for Price')
 plt.xlabel('Price (in dollars)')
@@ -282,17 +286,18 @@ plt.ylabel('Proportion of Cars')
 plt.close()"""
 
 """Polynomial regression (Numpy or Scikitlearn)"""
-
+"""
 # numpy module for single polynomial regression (it works with SLR setting degree=1 in the polyfit method)
 x = main_df['highway-mpg']
 y = main_df['price']
 f = np.polyfit(x, y, 3)  # train the module with a polynomial degree=3
 p = np.poly1d(f)  # p is the polynomial function
-#print(p)  # displays the function
-#print(p(30))  # to make and display predictions
+print(p)  # displays the function
+print(p(30))  # to make and display predictions"""
 
 # function to plot polynomial regression
-""""def PlotPolly(model, independent_variable, dependent_variabble, Name):
+"""
+def PlotPolly(model, independent_variable, dependent_variabble, Name):
     x_new = np.linspace(15, 55, 100)
     y_new = model(x_new)
 
@@ -310,7 +315,7 @@ p = np.poly1d(f)  # p is the polynomial function
 PlotPolly(p, x, y, 'highway-mpg')"""
 
 """Multivariate Polynomial regression (Scikitlearn)"""
-
+"""
 pr = PolynomialFeatures(degree=2, include_bias=False)  # creates a PolynomialFeatures object
 Z_pr = pr.fit_transform(Z)  # creates a new set of predictor with the combinations of the original predictors
 lm_pr = LinearRegression()
@@ -318,13 +323,13 @@ lm_pr.fit(Z_pr, main_df['price'])  # Train the module
 Yhat_pr = lm_pr.predict(Z_pr)  # predict target variable
 
 # draw a distribution plot
-"""ax1 = sns.distplot(main_df['price'], hist=False, color='r', label='actual value')
+ax1 = sns.distplot(main_df['price'], hist=False, color='r', label='actual value')
 sns.distplot(Yhat_pr, hist=False, color='b', label='predicted value', ax=ax1)
 plt.show()
 plt.close()"""
 
 """Pipelines (Scikitlearn) Example for a Multivariate polynomial regression"""
-
+"""
 # firstly we create the pipeline
 Input=[('scale',StandardScaler()), ('polynomial', PolynomialFeatures(include_bias=False)), ('model',LinearRegression())]
 
@@ -332,39 +337,193 @@ Input=[('scale',StandardScaler()), ('polynomial', PolynomialFeatures(include_bia
 pipe=Pipeline(Input)
 
 # perform all the actions in the pipeline
-pipe.fit(Z,main_df['price'])
+pipe.fit(Z,main_df['price'])"""
 
 """MODEL NUMERICAL EVALUATION"""
 
 """Single linear regression"""
-
+"""
 # Mean Squared Error (MSE)
 mse = mean_squared_error(main_df['price'], Yhat_slr)
 print('<SLR> The mean square error of price and predicted value is: ', mse)
 # R^2
-print(lm_slr.score(X,main_df['price']))
+print(lm_slr.score(X,main_df['price']))"""
 
 """Multiple linear regression"""
-
+"""
 # Mean Squared Error (MSE)
 mse = mean_squared_error(main_df['price'], Yhat_mlr)
 print('<MLR> The mean square error of price and predicted value is: ', mse)
 # R^2
-print(lm_mlr.score(Z,main_df['price']))
+print(lm_mlr.score(Z,main_df['price']))"""
 
 """Polynomial regression"""
-
+"""
 # Mean Squared Error (MSE)
 mse = mean_squared_error(main_df['price'], p(x))
 print('<PR> The mean square error of price and predicted value is: ', mse)
 
 # R^2 (we are using Numpy so it's a different code)
 r_squared = r2_score(main_df['price'], p(x))
-print('The R-square value is: ', r_squared)
+print('The R-square value is: ', r_squared)"""
 
 """Multivariate Polynomial regression"""
+"""
 # Mean Squared Error (MSE)
 mse = mean_squared_error(main_df['price'], Yhat_pr)
 print('<MPR> The mean square error of price and predicted value is: ', mse)
 # R^2
-print(lm_pr.score(Z_pr,main_df['price']))
+print(lm_pr.score(Z_pr,main_df['price']))"""
+
+"""MODEL EVALUATION AND REFINEMENT"""
+
+# Separate predictors from target
+y_data = main_df['price']
+x_data = main_df.drop('price', axis=1)
+
+# split the data set in training and testing
+x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.15, random_state=1)
+
+# linear regression model on one predictor
+lre = LinearRegression()
+lre.fit(x_train[['horsepower']], y_train)
+print("number of test samples :", x_test.shape[0])
+print("number of training samples:", x_train.shape[0])
+
+# scoring the linear regression model
+print("train score: ", lre.score(x_train[['horsepower']], y_train))
+print("test score: ", lre.score(x_test[['horsepower']], y_test))
+
+"""Cross Validation (K-fold)"""
+
+# Cross validation on 4 folds. Returns the array of scores i.e. R^2
+Rcross = cross_val_score(lre, x_data[['horsepower']], y_data, cv=4)
+print("The mean of the folds are", Rcross.mean(), "and the standard deviation is", Rcross.std())
+
+# Predictions with cross validation
+Yhat_cr = cross_val_predict(lre, x_data[['horsepower']], y_data, cv=4)
+print("Prediction with cross validation: ", Yhat_cr[0:5])
+
+"""Overfitting, Underfitting and Model Selection"""
+
+
+# Function for distribution plot (only formatting)
+def DistributionPlot(RedFunction, BlueFunction, RedName, BlueName, Title):
+    width = 12
+    height = 10
+    plt.figure(figsize=(width, height))
+
+    ax1 = sns.distplot(RedFunction, hist=False, color="r", label=RedName)
+    ax2 = sns.distplot(BlueFunction, hist=False, color="b", label=BlueName, ax=ax1)
+
+    plt.title(Title)
+    plt.xlabel('Price (in dollars)')
+    plt.ylabel('Proportion of Cars')
+
+# Second function for plotting polinomial regression (for test and train datasets + formatting)
+def PollyPlot(xtrain, xtest, y_train, y_test, lr, poly_transform):
+    width = 12
+    height = 10
+    plt.figure(figsize=(width, height))
+
+    # training data
+    # testing data
+    # lr:  linear regression object
+    # poly_transform:  polynomial transformation object
+
+    xmax = max([xtrain.values.max(), xtest.values.max()])
+    xmin = min([xtrain.values.min(), xtest.values.min()])
+    x = np.arange(xmin, xmax, 0.1)
+
+    plt.plot(xtrain, y_train, 'ro', label='Training Data')
+    plt.plot(xtest, y_test, 'go', label='Test Data')
+    plt.plot(x, lr.predict(poly_transform.fit_transform(x.reshape(-1, 1))), label='Predicted Function')
+    plt.ylim([-10000, 60000])
+    plt.ylabel('Price')
+    plt.legend()
+
+# Create another Linear regression model
+lr = LinearRegression()
+lr.fit(x_train[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']], y_train)
+
+# prediction with train dataset
+Yhat_train = lr.predict(x_train[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']])
+print("Prediction with train dataset: ", Yhat_train[0:5])
+
+# Prediction with test dataset
+Yhat_test = lr.predict(x_test[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']])
+print("Prediction with test dataset: ", Yhat_test[0:5])
+
+Title = 'Distribution  Plot of  Predicted Value Using Training Data vs Training Data Distribution'
+DistributionPlot(y_train, Yhat_train, "Actual Values (Train)", "Predicted Values (Train)", Title)
+# plt.show()
+plt.close()
+
+Title='Distribution  Plot of  Predicted Value Using Test Data vs Data Distribution of Test Data'
+DistributionPlot(y_test,Yhat_test,"Actual Values (Test)","Predicted Values (Test)",Title)
+# plt.show()
+plt.close()
+
+
+# Create a 5th degree polynomial transformation of the variable 'horsepower'
+x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.45, random_state=0)
+pr = PolynomialFeatures(degree=5)
+x_train_pr = pr.fit_transform(x_train[['horsepower']])
+x_test_pr = pr.fit_transform(x_test[['horsepower']])
+
+# Crate a polynomial model with the already transformed variable
+poly = LinearRegression()
+poly.fit(x_train_pr, y_train)
+yhat = poly.predict(x_test_pr)
+
+PollyPlot(x_train[['horsepower']], x_test[['horsepower']], y_train, y_test, poly,pr)
+#plt.show()
+plt.close()
+
+# calculate the score for test and train
+print("train score: ", poly.score(x_train_pr, y_train))
+print("test score: ", poly.score(x_test_pr, y_test))
+
+# calculate the score for different order polynomial
+Rsqu_test = []
+
+order = [1, 2, 3, 4]
+for n in order:
+    pr = PolynomialFeatures(degree=n)
+
+    x_train_pr = pr.fit_transform(x_train[['horsepower']])
+
+    x_test_pr = pr.fit_transform(x_test[['horsepower']])
+
+    lr.fit(x_train_pr, y_train)
+
+    Rsqu_test.append(lr.score(x_test_pr, y_test))
+
+plt.plot(order, Rsqu_test)
+plt.xlabel('order')
+plt.ylabel('R^2')
+plt.title('R^2 Using Test Data')
+plt.text(3, 0.75, 'Maximum R^2 ')
+#plt.show()
+plt.close()
+
+# for interactive display in jupiter notebook
+"""
+from IPython.display import display
+#from IPython.html import widgets
+from IPython.display import display
+from ipywidgets import interact, interactive, fixed, interact_manual
+
+%%capture
+! pip install ipywidgets
+def f(order, test_data):
+    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=test_data, random_state=0)
+    pr = PolynomialFeatures(degree=order)
+    x_train_pr = pr.fit_transform(x_train[['horsepower']])
+    x_test_pr = pr.fit_transform(x_test[['horsepower']])
+    poly = LinearRegression()
+    poly.fit(x_train_pr,y_train)
+    PollyPlot(x_train[['horsepower']], x_test[['horsepower']], y_train,y_test, poly, pr)
+    plt.show()
+
+interact(f, order=(0, 6, 1), test_data=(0.05, 0.95, 0.05))"""
