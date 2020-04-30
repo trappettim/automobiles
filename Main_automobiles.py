@@ -13,6 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_val_predict
 from sklearn.linear_model import Ridge
+from sklearn.model_selection import GridSearchCV
 
 """PRINTING SETTINGS FOR DATAFRAMES AND ARRAYS"""
 
@@ -545,6 +546,7 @@ RigeModel.fit(x_train_pr, y_train)
 # return a prediction
 yhat = RigeModel.predict(x_test_pr)
 
+
 # we can now test different value of alpha in our model to see which one perform better
 Rsqu_test = []
 Rsqu_train = []
@@ -565,6 +567,25 @@ plt.plot(ALFA,Rsqu_train, 'r', label='training Data ')
 plt.xlabel('alpha')
 plt.ylabel('R^2')
 plt.legend()
-plt.show()
+#plt.show()
 
-""""""
+
+"""Grid search"""
+
+# define the two hyperparameters (parameters to set before the fit) we want to loop on
+parameters2 = [{'alpha': [0.001,0.1,1, 10, 100, 1000,10000,100000,100000],'normalize':[True,False]}]
+
+# define the GridSearch object (function, hyperparameters, number of folds for the cross validation)
+Grid2 = GridSearchCV(Ridge(), parameters2,cv=4)
+
+# fit the model on 4 predictors (to me this should be on x_train and y_train so that, later on, it is possible to
+# calculate the score on the x_test, y_test)
+Grid2.fit(x_data[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']], y_data)
+
+# find the best performing hyperparameters
+BestRR = Grid2.best_estimator_
+print(BestRR)
+
+# return the score of the best performing parameters
+RRsc = BestRR.score(x_test[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg']], y_test)
+print(RRsc)
