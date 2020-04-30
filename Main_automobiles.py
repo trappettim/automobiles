@@ -12,7 +12,7 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_val_predict
-
+from sklearn.linear_model import Ridge
 
 """PRINTING SETTINGS FOR DATAFRAMES AND ARRAYS"""
 
@@ -459,11 +459,10 @@ DistributionPlot(y_train, Yhat_train, "Actual Values (Train)", "Predicted Values
 # plt.show()
 plt.close()
 
-Title='Distribution  Plot of  Predicted Value Using Test Data vs Data Distribution of Test Data'
-DistributionPlot(y_test,Yhat_test,"Actual Values (Test)","Predicted Values (Test)",Title)
+Title = 'Distribution  Plot of  Predicted Value Using Test Data vs Data Distribution of Test Data'
+DistributionPlot(y_test, Yhat_test, "Actual Values (Test)", "Predicted Values (Test)", Title)
 # plt.show()
 plt.close()
-
 
 # Create a 5th degree polynomial transformation of the variable 'horsepower'
 x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.45, random_state=0)
@@ -476,8 +475,8 @@ poly = LinearRegression()
 poly.fit(x_train_pr, y_train)
 yhat = poly.predict(x_test_pr)
 
-PollyPlot(x_train[['horsepower']], x_test[['horsepower']], y_train, y_test, poly,pr)
-#plt.show()
+PollyPlot(x_train[['horsepower']], x_test[['horsepower']], y_train, y_test, poly, pr)
+# plt.show()
 plt.close()
 
 # calculate the score for test and train
@@ -504,7 +503,7 @@ plt.xlabel('order')
 plt.ylabel('R^2')
 plt.title('R^2 Using Test Data')
 plt.text(3, 0.75, 'Maximum R^2 ')
-#plt.show()
+# plt.show()
 plt.close()
 
 # for interactive display in jupiter notebook
@@ -527,3 +526,45 @@ def f(order, test_data):
     plt.show()
 
 interact(f, order=(0, 6, 1), test_data=(0.05, 0.95, 0.05))"""
+
+"""Ridge Regression (Alpha factor)"""
+
+# degree 2 polinomyal transformation
+pr = PolynomialFeatures(degree=2)
+x_train_pr = pr.fit_transform(
+    x_train[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg', 'normalized-losses', 'symboling']])
+x_test_pr = pr.fit_transform(
+    x_test[['horsepower', 'curb-weight', 'engine-size', 'highway-mpg', 'normalized-losses', 'symboling']])
+
+# create a Ridge regression object
+RigeModel = Ridge(alpha=0.1)
+
+# fit the model
+RigeModel.fit(x_train_pr, y_train)
+
+# return a prediction
+yhat = RigeModel.predict(x_test_pr)
+
+# we can now test different value of alpha in our model to see which one perform better
+Rsqu_test = []
+Rsqu_train = []
+
+ALFA = 10 * np.array(range(0,1000))
+for alfa in ALFA:
+    RigeModel = Ridge(alpha=alfa)
+    RigeModel.fit(x_train_pr, y_train)
+    Rsqu_test.append(RigeModel.score(x_test_pr, y_test))
+    Rsqu_train.append(RigeModel.score(x_train_pr, y_train))
+
+# plot R^2 for different alpha
+width = 12
+height = 10
+plt.figure(figsize=(width, height))
+plt.plot(ALFA,Rsqu_test, label='validation data  ')
+plt.plot(ALFA,Rsqu_train, 'r', label='training Data ')
+plt.xlabel('alpha')
+plt.ylabel('R^2')
+plt.legend()
+plt.show()
+
+""""""
